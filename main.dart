@@ -13,7 +13,8 @@ class MyApp extends StatelessWidget {
       onTap: () {
         FocusScopeNode currentFocus = FocusScope.of(context);
 
-        if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null) {
+        if (!currentFocus.hasPrimaryFocus &&
+            currentFocus.focusedChild != null) {
           FocusManager.instance.primaryFocus.unfocus();
         }
       },
@@ -22,6 +23,10 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blue,
           visualDensity: VisualDensity.adaptivePlatformDensity,
+          dividerTheme: DividerThemeData(
+            space: 0,
+            thickness: 1,
+          ),
         ),
         home: MyHomePage(title: 'Transformer textfield demo'),
       ),
@@ -40,7 +45,14 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   // This string is used to give the textfield an initial value
-  String text = 'I am a bear';
+  List<String> list = [
+    'I am a bear',
+    'I am a cat',
+    'I am a dog',
+    'I am a bird',
+    'Something incredibly long to see what happens if the text needs to wrap around to the next line.',
+    'I am an Eagle',
+  ];
 
   // This function transforms the text shown in the textview
   // when the textfield is not in focus
@@ -49,30 +61,39 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   // This function updates the text used in the textfield
-  void _updateText(String str){
+  void _updateText(int index, String str) {
     setState(() {
-      text = str;
+      list[index] = str;
+    });
+  }
+
+  void _deleteItem(int index){
+    setState(() {
+      if(list[index] != null){
+        list.removeAt(index);
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
       ),
       body: Center(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            TransformerTextField(
-              text: text,
-              transformFunction: _transformFunction,
-              updateFunction: _updateText,
-            ),
-          ],
+        child: ListView.separated(
+          itemBuilder: (context, index) {
+            return TransformerTextField(
+              index: index,
+              text: list[index],
+              onUpdate: _updateText,
+              onTransform: _transformFunction,
+              onDelete: _deleteItem,
+            );
+          },
+          separatorBuilder: (context, index) => Divider(),
+          itemCount: list.length,
         ),
       ),
     );
